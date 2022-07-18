@@ -454,27 +454,46 @@ PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
 
         if (epgData.HasMember("episode"))
         {
+          const auto& episode = epgData["episode"];
           // set description
-          if (epgData["episode"].HasMember("description") &&
-              epgData["episode"]["description"].IsString())
+          if (episode.HasMember("description") &&
+              episode["description"].IsString())
           {
-            tag.SetPlot(epgData["episode"]["description"].GetString());
-            kodi::Log(ADDON_LOG_DEBUG, "[epg] description: %s;",
-                      epgData["episode"]["description"].GetString());
+            tag.SetPlot(episode["description"].GetString());
+            kodi::Log(ADDON_LOG_DEBUG, "[epg] description: %s;", episode["description"].GetString());
           }
 
           // genre
-          if (epgData["episode"].HasMember("genre") && epgData["episode"]["genre"].IsString())
+          if (episode.HasMember("genre") && episode["genre"].IsString())
           {
             tag.SetGenreType(EPG_GENRE_USE_STRING);
-            tag.SetGenreDescription(epgData["episode"]["genre"].GetString());
+            tag.SetGenreDescription(episode["genre"].GetString());
           }
 
           // thumbnail
-          if (epgData["episode"].HasMember("thumbnail") &&
-              epgData["episode"]["thumbnail"]["path"].IsString())
+          if (episode.HasMember("thumbnail") &&
+              episode["thumbnail"]["path"].IsString())
           {
-            tag.SetIconPath(epgData["episode"]["thumbnail"]["path"].GetString());
+            tag.SetIconPath(episode["thumbnail"]["path"].GetString());
+          }
+
+          // series title / episode name
+          if (episode.HasMember("series") &&
+              episode["series"].HasMember("name") &&
+              episode["series"]["name"].IsString() &&
+              episode.HasMember("name") &&
+              episode["name"].IsString())
+          {
+            // series title
+            tag.SetTitle(episode["series"]["name"].GetString());
+            kodi::Log(ADDON_LOG_DEBUG, "[epg] series title: %s;", episode["series"]["name"].GetString());
+
+            // episode name
+            tag.SetEpisodeName(episode["name"].GetString());
+            kodi::Log(ADDON_LOG_DEBUG, "[epg] episode name: %s;", episode["name"].GetString());
+
+            // set is series
+            tag.SetFlags(EPG_TAG_FLAG_IS_SERIES);
           }
         }
 
