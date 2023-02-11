@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="pvr.plutotv"
-  version="20.3.0"
+  version="21.0.0"
   name="Pluto.tv PVR Client"
   provider-name="Team Kodi, flubshi">
   <requires>@ADDON_DEPENDS@
-    <import addon="script.module.inputstreamhelper" version="0.4.1"/>
-    <import addon="inputstream.adaptive" minversion="2.6.6"/>
+    <import addon="script.module.inputstreamhelper" version="21.0.0"/>
+    <import addon="inputstream.adaptive" minversion="21.0.0"/>
   </requires>
   <extension
     point="kodi.pvrclient"
