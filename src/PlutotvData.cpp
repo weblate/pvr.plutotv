@@ -113,7 +113,8 @@ bool PlutotvData::LoadChannelsData()
   kodi::Log(ADDON_LOG_DEBUG, "[channels] iterate channels");
   kodi::Log(ADDON_LOG_DEBUG, "[channels] size: %i;", channelsDoc["result"].Size());
 
-  int i = 0;
+  // Use configured start channel number to populate the channel list
+  int i = GetSettingsStartChannel();
   for (const auto& channel : channelsDoc["result"].GetArray())
   {
     /**
@@ -153,9 +154,9 @@ bool PlutotvData::LoadChannelsData()
       }}, */
 
     const std::string plutotvid = channel["_id"].GetString();
-    ++i;
+
     PlutotvChannel plutotv_channel;
-    plutotv_channel.iChannelNumber = i; // position
+    plutotv_channel.iChannelNumber = i++; // position
     kodi::Log(ADDON_LOG_DEBUG, "[channel] channelnr(pos): %i;", plutotv_channel.iChannelNumber);
 
     plutotv_channel.plutotvID = plutotvid;
@@ -260,6 +261,11 @@ std::string PlutotvData::GetSettingsUUID(const std::string& setting)
     kodi::addon::SetSettingString(setting, uuid);
   }
   return uuid;
+}
+
+int PlutotvData::GetSettingsStartChannel() const
+{
+  return kodi::addon::GetSettingInt("start_channelnum", 1);
 }
 
 std::string PlutotvData::GetChannelStreamURL(int uniqueId)
