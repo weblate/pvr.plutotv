@@ -1,3 +1,6 @@
+v21.1.0
+- Add setting for the first channel number used
+
 v21.0.2
 - Fix crash when no channels are returned from pluto API
 
