@@ -30,6 +30,10 @@ msgctxt "#30007"
 msgid "(Re)install Widevine CDM library"
 msgstr ""
 
+msgctxt "#30008"
+msgid "First channel number"
+msgstr ""
+
 msgctxt "#30040"
 msgid "Debug"
 msgstr ""

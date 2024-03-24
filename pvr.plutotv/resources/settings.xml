@@ -3,6 +3,14 @@
 	<section id="pvr.plutotv">
 		<category id="credentials" label="30001" help="">
 			<group id="1" label="">
+				<setting id="start_channelnum" type="integer" label="30008" help="">
+					<level>0</level>
+					<default>1</default>
+					<constraints>
+						<allowempty>false</allowempty>
+					</constraints>
+					<control type="edit" format="integer" />
+				</setting>
 				<setting id="install_widevine" type="string" label="30007"
 					help="">
 					<level>0</level>
