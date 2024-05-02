@@ -76,10 +76,10 @@ void PlutotvData::SetStreamProperties(std::vector<kodi::addon::PVRStreamProperty
   properties.emplace_back(PVR_STREAM_PROPERTY_INPUTSTREAM, "inputstream.adaptive");
   properties.emplace_back(PVR_STREAM_PROPERTY_ISREALTIMESTREAM, realtime ? "true" : "false");
   // HLS
-  kodi::Log(ADDON_LOG_DEBUG, "[PLAY STREAM] hls");
-  properties.emplace_back("inputstream.adaptive.manifest_type", "hls");
   properties.emplace_back(PVR_STREAM_PROPERTY_MIMETYPE, "application/x-mpegURL");
-  properties.emplace_back("inputstream.adaptive.manifest_update_parameter", "full");
+  if (GetSettingsWorkaroundBrokenStreams())
+    properties.emplace_back("inputstream.adaptive.manifest_config",
+                            "{\"hls_ignore_endlist\":true,\"hls_fix_mediasequence\":true,\"hls_fix_discsequence\":true}");
 }
 
 bool PlutotvData::LoadChannelsData()
@@ -266,6 +266,11 @@ std::string PlutotvData::GetSettingsUUID(const std::string& setting)
 int PlutotvData::GetSettingsStartChannel() const
 {
   return kodi::addon::GetSettingInt("start_channelnum", 1);
+}
+
+bool PlutotvData::GetSettingsWorkaroundBrokenStreams() const
+{
+  return kodi::addon::GetSettingBoolean("workaround_broken_streams", true);
 }
 
 std::string PlutotvData::GetChannelStreamURL(int uniqueId)
