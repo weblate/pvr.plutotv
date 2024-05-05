@@ -24,16 +24,12 @@ msgid "Pluto.tv PVR Client. Note: This is not an official pluto.tv add-on and no
 msgstr "Pluto.tv PVR 클라이언트. 참고 : 이것은 공식 pluto.tv 애드온이 아니며 pluto.tv와 관련이 없습니다. 자원 봉사자가 개발했습니다."
 
 msgctxt "#30001"
-msgid "General"
-msgstr "일반"
+msgid "Playback"
+msgstr ""
 
-msgctxt "#30006"
-msgid "InputStream Helper information"
-msgstr "InputStream 도움 정보"
-
-msgctxt "#30007"
-msgid "(Re)install Widevine CDM library"
-msgstr "Widevine CDM 라이브러리 (재)설치"
+msgctxt "#30002"
+msgid "Channels"
+msgstr ""
 
 msgctxt "#30008"
 msgid "First channel number"
@@ -42,6 +38,10 @@ msgstr "첫 번째 채널 번호"
 msgctxt "#30009"
 msgid "Workaround for broken streams (requires inputstream.adaptive > 21.4.5)"
 msgstr "끊어진 스트림에 대한 해결 방법(inputstream.adaptive > 21.4.5 필요)"
+
+msgctxt "#30010"
+msgid "Coloured channel logos"
+msgstr ""
 
 msgctxt "#30040"
 msgid "Debug"
@@ -54,3 +54,39 @@ msgstr "SID"
 msgctxt "#30042"
 msgid "Device ID"
 msgstr "장치 ID"
+
+msgctxt "#30100"
+msgid "Category containing playback settings"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Enable special stream handling to avoid hangs during playback."
+msgstr ""
+
+msgctxt "#30200"
+msgid "Category containing channel settings"
+msgstr ""
+
+msgctxt "#30201"
+msgid "The number for the first channel. Useful if you have multiple PVR clients enabled - to group the channels from the different clients."
+msgstr ""
+
+msgctxt "#30202"
+msgid "Use coulored channel logos, if available."
+msgstr ""
+
+msgctxt "#30300"
+msgid "Category containing debug settings"
+msgstr ""
+
+#~ msgctxt "#30001"
+#~ msgid "General"
+#~ msgstr "일반"
+
+#~ msgctxt "#30006"
+#~ msgid "InputStream Helper information"
+#~ msgstr "InputStream 도움 정보"
+
+#~ msgctxt "#30007"
+#~ msgid "(Re)install Widevine CDM library"
+#~ msgstr "Widevine CDM 라이브러리 (재)설치"
