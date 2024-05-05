@@ -1,6 +1,7 @@
 v21.3.0
-- Introduce a setting to toggle between monochrome and color channel logos (default: color)
+- Introduce a setting to toggle between monochrome and color channel logos (default: color).
 - Remove Inputstreamhelper addon dependency and related settings (pluto.tv streams are unencrypted).
+- Add help texts for settings.
 
 v21.2.0
 - Add setting to work around broken HLS streams provided by pluto.tv (requires inputstream.adaptive > 21.4.5)

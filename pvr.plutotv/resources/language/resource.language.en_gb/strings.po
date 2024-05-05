@@ -49,3 +49,27 @@ msgstr ""
 msgctxt "#30042"
 msgid "Device ID"
 msgstr ""
+
+msgctxt "#30100"
+msgid "Category containing playback settings"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Enable special stream handling to avoid hangs during playback."
+msgstr ""
+
+msgctxt "#30200"
+msgid "Category containing channel settings"
+msgstr ""
+
+msgctxt "#30201"
+msgid "The number for the first channel. Useful if you have multiple PVR clients enabled - to group the channels from the different clients."
+msgstr ""
+
+msgctxt "#30202"
+msgid "Use coulored channel logos, if available."
+msgstr ""
+
+msgctxt "#30300"
+msgid "Category containing debug settings"
+msgstr ""
