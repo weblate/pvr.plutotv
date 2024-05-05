@@ -22,6 +22,10 @@ msgctxt "#30001"
 msgid "General"
 msgstr ""
 
+msgctxt "#30002"
+msgid "Channels"
+msgstr ""
+
 msgctxt "#30006"
 msgid "InputStream Helper information"
 msgstr ""
@@ -36,6 +40,10 @@ msgstr ""
 
 msgctxt "#30009"
 msgid "Workaround for broken streams (requires inputstream.adaptive > 21.4.5)"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Coloured channel logos"
 msgstr ""
 
 msgctxt "#30040"

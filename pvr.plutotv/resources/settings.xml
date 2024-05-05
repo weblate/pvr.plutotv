@@ -3,14 +3,6 @@
 	<section id="pvr.plutotv">
 		<category id="general" label="30001" help="">
 			<group id="1" label="">
-				<setting id="start_channelnum" type="integer" label="30008" help="">
-					<level>0</level>
-					<default>1</default>
-					<constraints>
-						<allowempty>false</allowempty>
-					</constraints>
-					<control type="edit" format="integer" />
-				</setting>
 				<setting id="workaround_broken_streams" type="boolean" label="30009" help="-1">
 					<level>2</level>
 					<default>true</default>
@@ -26,8 +18,7 @@
 						<data>RunScript(script.module.inputstreamhelper,widevine_install)
 						</data>
 					</control>
-					<dependency type="visible" operator="!is"
-						setting="system.platform.android">true</dependency>
+					<dependency type="visible" operator="!is" setting="system.platform.android">true</dependency>
 				</setting>
 				<setting id="run_is_info" type="string" label="30006" help="">
 					<level>0</level>
@@ -39,6 +30,23 @@
 						<data>RunScript(script.module.inputstreamhelper,info)</data>
 					</control>
 					<dependency type="visible" operator="!is" setting="system.platform.android">true</dependency>
+				</setting>
+			</group>
+		</category>
+		<category id="channels" label="30002" help="">
+			<group id="1" label="">
+				<setting id="start_channelnum" type="integer" label="30008" help="">
+					<level>0</level>
+					<default>1</default>
+					<constraints>
+						<allowempty>false</allowempty>
+					</constraints>
+					<control type="edit" format="integer" />
+				</setting>
+				<setting id="colored_channel_logos" type="boolean" label="30010" help="-1">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
 				</setting>
 			</group>
 		</category>
