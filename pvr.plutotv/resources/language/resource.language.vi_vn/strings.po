@@ -24,15 +24,11 @@ msgid "Pluto.tv PVR Client. Note: This is not an official pluto.tv add-on and no
 msgstr ""
 
 msgctxt "#30001"
-msgid "General"
-msgstr "Tổng Quan"
-
-msgctxt "#30006"
-msgid "InputStream Helper information"
+msgid "Playback"
 msgstr ""
 
-msgctxt "#30007"
-msgid "(Re)install Widevine CDM library"
+msgctxt "#30002"
+msgid "Channels"
 msgstr ""
 
 msgctxt "#30008"
@@ -41,6 +37,10 @@ msgstr ""
 
 msgctxt "#30009"
 msgid "Workaround for broken streams (requires inputstream.adaptive > 21.4.5)"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Coloured channel logos"
 msgstr ""
 
 msgctxt "#30040"
@@ -54,3 +54,31 @@ msgstr ""
 msgctxt "#30042"
 msgid "Device ID"
 msgstr ""
+
+msgctxt "#30100"
+msgid "Category containing playback settings"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Enable special stream handling to avoid hangs during playback."
+msgstr ""
+
+msgctxt "#30200"
+msgid "Category containing channel settings"
+msgstr ""
+
+msgctxt "#30201"
+msgid "The number for the first channel. Useful if you have multiple PVR clients enabled - to group the channels from the different clients."
+msgstr ""
+
+msgctxt "#30202"
+msgid "Use coulored channel logos, if available."
+msgstr ""
+
+msgctxt "#30300"
+msgid "Category containing debug settings"
+msgstr ""
+
+#~ msgctxt "#30001"
+#~ msgid "General"
+#~ msgstr "Tổng Quan"
