@@ -75,6 +75,7 @@ private:
   std::string GetChannelStreamURL(int uniqueId);
   std::string GetSettingsUUID(const std::string& setting);
   int GetSettingsStartChannel() const;
+  bool GetSettingsColoredChannelLogos() const;
   bool GetSettingsWorkaroundBrokenStreams() const;
   void SetStreamProperties(std::vector<kodi::addon::PVRStreamProperty>& properties,
                            const std::string& url,

@@ -43,7 +43,7 @@ ADDON_STATUS PlutotvData::Create()
 ADDON_STATUS PlutotvData::SetSetting(const std::string& settingName,
                                      const kodi::addon::CSettingValue& settingValue)
 {
-  return ADDON_STATUS_OK;
+  return ADDON_STATUS_NEED_RESTART;
 }
 
 PVR_ERROR PlutotvData::GetCapabilities(kodi::addon::PVRCapabilities& capabilities)
@@ -171,17 +171,25 @@ bool PlutotvData::LoadChannelsData()
     kodi::Log(ADDON_LOG_DEBUG, "[channel] name: %s;", plutotv_channel.strChannelName.c_str());
 
     std::string logo;
-    if (channel.HasMember("logo"))
+    if (GetSettingsColoredChannelLogos())
+    {
+      if (channel.HasMember("colorLogoPNG"))
+        logo = channel["colorLogoPNG"]["path"].GetString();
+    }
+    else
+    {
+      if (channel.HasMember("solidLogoPNG"))
+        logo = channel["solidLogoPNG"]["path"].GetString();
+    }
+    // fallback, should always work
+    if (logo.empty() && channel.HasMember("logo"))
     {
       logo = channel["logo"]["path"].GetString();
-    }
-    else if (channel.HasMember("colorLogoPNG"))
-    {
-      logo = channel["colorLogoPNG"]["path"].GetString();
+      kodi::Log(ADDON_LOG_DEBUG, "[channel] logo (fallback): %s;", logo.c_str());
     }
 
     plutotv_channel.strIconPath = logo;
-    kodi::Log(ADDON_LOG_DEBUG, "[channel] logo: %s;", plutotv_channel.strIconPath.c_str());
+    kodi::Log(ADDON_LOG_DEBUG, "[channel] iconpath: %s;", plutotv_channel.strIconPath.c_str());
 
     if (channel.HasMember("stitched") && channel["stitched"].HasMember("urls") &&
         channel["stitched"]["urls"].Size() > 0)
@@ -266,6 +274,11 @@ std::string PlutotvData::GetSettingsUUID(const std::string& setting)
 int PlutotvData::GetSettingsStartChannel() const
 {
   return kodi::addon::GetSettingInt("start_channelnum", 1);
+}
+
+bool PlutotvData::GetSettingsColoredChannelLogos() const
+{
+  return kodi::addon::GetSettingBoolean("colored_channel_logos", true);
 }
 
 bool PlutotvData::GetSettingsWorkaroundBrokenStreams() const
