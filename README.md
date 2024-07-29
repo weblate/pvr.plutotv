@@ -3,9 +3,9 @@
 This is the Pluto.tv PVR client addon for [Kodi](https://kodi.tv). It provides Kodi integration for the TV streaming provider pluto.tv
 
 [![License: GPL-2.0-or-later](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](LICENSE.md)
-[![Build and run tests](https://github.com/kodi-pvr/pvr.plutotv/actions/workflows/build.yml/badge.svg?branch=Omega)](https://github.com/kodi-pvr/pvr.plutotv/actions/workflows/build.yml)
-[![Build Status](https://dev.azure.com/teamkodi/kodi-pvr/_apis/build/status/kodi-pvr.pvr.plutotv?branchName=Omega)](https://dev.azure.com/teamkodi/kodi-pvr/_build/latest?definitionId=81&branchName=Omega)
-[![Build Status](https://jenkins.kodi.tv/view/Addons/job/kodi-pvr/job/pvr.plutotv/job/Omega/badge/icon)](https://jenkins.kodi.tv/blue/organizations/jenkins/kodi-pvr%2Fpvr.plutotv/branches/)
+[![Build and run tests](https://github.com/kodi-pvr/pvr.plutotv/actions/workflows/build.yml/badge.svg?branch=Piers)](https://github.com/kodi-pvr/pvr.plutotv/actions/workflows/build.yml)
+[![Build Status](https://dev.azure.com/teamkodi/kodi-pvr/_apis/build/status/kodi-pvr.pvr.plutotv?branchName=Piers)](https://dev.azure.com/teamkodi/kodi-pvr/_build/latest?definitionId=81&branchName=Piers)
+[![Build Status](https://jenkins.kodi.tv/view/Addons/job/kodi-pvr/job/pvr.plutotv/job/Piers/badge/icon)](https://jenkins.kodi.tv/blue/organizations/jenkins/kodi-pvr%2Fpvr.plutotv/branches/)
 
 ## Build instructions
 
