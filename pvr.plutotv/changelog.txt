@@ -1,3 +1,6 @@
+v22.1.1
+- Add custom user agent to inputstream.adaptive properties.
+
 v22.1.0
 - PVR Add-on API v9.0.0
 
