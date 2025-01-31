@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
-"PO-Revision-Date: 2025-01-17 22:49+0000\n"
-"Last-Translator: Anonymous <noreply@weblate.org>\n"
+"PO-Revision-Date: 2025-01-31 09:27+0000\n"
+"Last-Translator: A B <maxtherabbit85@gmail.com>\n"
 "Language-Team: Finnish <https://kodi.weblate.cloud/projects/kodi-add-ons-pvr-clients/pvr-plutotv/fi_fi/>\n"
 "Language: fi_fi\n"
 "MIME-Version: 1.0\n"
@@ -25,23 +25,23 @@ msgstr "Pluto.tv PVR-pääte. Huomioi: Tämä ei ole virallinen pluto.tv-lisäos
 
 msgctxt "#30001"
 msgid "Playback"
-msgstr ""
+msgstr "Toisto"
 
 msgctxt "#30002"
 msgid "Channels"
-msgstr ""
+msgstr "Kanavat"
 
 msgctxt "#30008"
 msgid "First channel number"
-msgstr ""
+msgstr "Ensimmäisen kanavan numero"
 
 msgctxt "#30009"
 msgid "Workaround for broken streams (requires inputstream.adaptive > 21.4.5)"
-msgstr ""
+msgstr "Korjaus rikkinäisille striimeille (vaatii Inputstream Adaptive -lisäosan > 21.4.5)"
 
 msgctxt "#30010"
 msgid "Coloured channel logos"
-msgstr ""
+msgstr "Värilliset kanavalogot"
 
 msgctxt "#30040"
 msgid "Debug"
@@ -57,27 +57,27 @@ msgstr "Laitetunniste"
 
 msgctxt "#30100"
 msgid "Category containing playback settings"
-msgstr ""
+msgstr "Kategoria sisältää toistoasetukset"
 
 msgctxt "#30101"
 msgid "Enable special stream handling to avoid hangs during playback."
-msgstr ""
+msgstr "Käytä poikkeavaa striimien käsittälyä toiston jumiutumisen estämiseksi."
 
 msgctxt "#30200"
 msgid "Category containing channel settings"
-msgstr ""
+msgstr "Kategoria sisältää kanava-asetukset"
 
 msgctxt "#30201"
 msgid "The number for the first channel. Useful if you have multiple PVR clients enabled - to group the channels from the different clients."
-msgstr ""
+msgstr "Ensimmäisen kanavan numero. Helpottaa kanavien järjestämistä, jos käytössä on useita PVR-päätteitä."
 
 msgctxt "#30202"
 msgid "Use coulored channel logos, if available."
-msgstr ""
+msgstr "Käytä värillisiä kanavalogoja, jos käytettävissä."
 
 msgctxt "#30300"
 msgid "Category containing debug settings"
-msgstr ""
+msgstr "Kategoria sisältää virheenkorjausasetukset."
 
 #~ msgctxt "#30001"
 #~ msgid "General"

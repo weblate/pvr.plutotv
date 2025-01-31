@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
-"PO-Revision-Date: 2025-01-17 22:49+0000\n"
+"PO-Revision-Date: 2025-01-21 04:47+0000\n"
 "Last-Translator: Heiko Berner <berner.h@gmail.com>\n"
 "Language-Team: Afrikaans (South Africa) <https://kodi.weblate.cloud/projects/kodi-add-ons-pvr-clients/pvr-plutotv/af_za/>\n"
 "Language: af_za\n"
@@ -25,11 +25,11 @@ msgstr ""
 
 msgctxt "#30001"
 msgid "Playback"
-msgstr ""
+msgstr "Terugspeel"
 
 msgctxt "#30002"
 msgid "Channels"
-msgstr ""
+msgstr "Kanale"
 
 msgctxt "#30008"
 msgid "First channel number"
