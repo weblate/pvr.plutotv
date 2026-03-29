@@ -34,6 +34,7 @@ PVR_ERROR PlutotvData::GetCapabilities(kodi::addon::PVRCapabilities& capabilitie
 {
   capabilities.SetSupportsEPG(true);
   capabilities.SetSupportsTV(true);
+  capabilities.SetSupportsChannelGroups(true);
 
   return PVR_ERROR_NO_ERROR;
 }
@@ -128,7 +129,7 @@ bool PlutotvData::LoadChannelsData()
   nlohmann::json channelsDoc = nlohmann::json::parse(jsonChannels.c_str());
   if (channelsDoc.is_discarded())
   {
-    kodi::Log(ADDON_LOG_ERROR, "[LoadChannelData] ERROR: error while parsing json");
+    kodi::Log(ADDON_LOG_ERROR, "[LoadChannelsData] ERROR: error while parsing json");
     return false;
   }
   kodi::Log(ADDON_LOG_DEBUG, "[channels] iterate channels");
@@ -312,20 +313,135 @@ std::string PlutotvData::GetChannelStreamURL(int uniqueId)
   return {};
 }
 
+bool PlutotvData::LoadCategoriesData()
+{
+  if (m_categoriesLoaded)
+    return true;
+
+  GetJWT();
+  if (m_jwt.empty())
+    return false;
+
+  kodi::Log(ADDON_LOG_DEBUG, "[load data] GET CATEGORIES");
+
+  const std::string jsonCategories{GetCategoriesJson()};
+
+  if (jsonCategories.empty() || jsonCategories == "[]")
+  {
+    kodi::Log(ADDON_LOG_ERROR, "[categories] ERROR - empty response");
+    return false;
+  }
+
+  kodi::Log(ADDON_LOG_DEBUG, "[categories] length: %i", jsonCategories.size());
+  kodi::Log(ADDON_LOG_DEBUG, "[categories] %s", jsonCategories.c_str());
+
+  // parse categories
+  kodi::Log(ADDON_LOG_DEBUG, "[categories] parse categories");
+  nlohmann::json categoriesDoc = nlohmann::json::parse(jsonCategories.c_str());
+  if (categoriesDoc.is_discarded())
+  {
+    kodi::Log(ADDON_LOG_ERROR, "[LoadCategoriesData] ERROR: error while parsing json");
+    return false;
+  }
+  kodi::Log(ADDON_LOG_DEBUG, "[categories] iterate categories");
+  kodi::Log(ADDON_LOG_DEBUG, "[categories] size: %i", categoriesDoc.at("data").size());
+
+  for (const auto& category : categoriesDoc.at("data"))
+  {
+    PlutotvCategory plutotv_category;
+
+    plutotv_category.name = category.at("name");
+    kodi::Log(ADDON_LOG_DEBUG, "[category] name: %s", plutotv_category.name.c_str());
+
+    if (category.contains("channelIDs") && category.at("channelIDs").size() > 0)
+    {
+      kodi::Log(ADDON_LOG_DEBUG, "[category] length channel ids: %i",
+                category.at("channelIDs").size());
+      for (const auto& channelID : category.at("channelIDs"))
+      {
+        plutotv_category.channelUIDs.emplace_back(Utils::Hash(channelID));
+      }
+    }
+
+    m_categories.emplace_back(std::move(plutotv_category));
+  }
+
+  m_categoriesLoaded = true;
+  return true;
+}
+
 PVR_ERROR PlutotvData::GetChannelGroupsAmount(int& amount)
 {
-  return PVR_ERROR_NOT_IMPLEMENTED;
+  kodi::Log(ADDON_LOG_DEBUG, "pluto.tv function call: [%s]", __FUNCTION__);
+
+  if (!LoadCategoriesData())
+    return PVR_ERROR_SERVER_ERROR;
+
+  amount = static_cast<int>(m_categories.size());
+  return PVR_ERROR_NO_ERROR;
 }
 
 PVR_ERROR PlutotvData::GetChannelGroups(bool radio, kodi::addon::PVRChannelGroupsResultSet& results)
 {
-  return PVR_ERROR_NOT_IMPLEMENTED;
+  kodi::Log(ADDON_LOG_DEBUG, "pluto.tv function call: [%s]", __FUNCTION__);
+
+  if (!radio)
+  {
+    if (!LoadCategoriesData())
+      return PVR_ERROR_SERVER_ERROR;
+
+    int pos{1};
+    for (const auto& category : m_categories)
+    {
+      kodi::addon::PVRChannelGroup kodiChannelGroup;
+
+      kodiChannelGroup.SetIsRadio(false);
+      kodiChannelGroup.SetGroupName(category.name);
+      kodiChannelGroup.SetPosition(pos);
+
+      results.Add(std::move(kodiChannelGroup));
+      pos++;
+    }
+  }
+
+  return PVR_ERROR_NO_ERROR;
 }
 
 PVR_ERROR PlutotvData::GetChannelGroupMembers(const kodi::addon::PVRChannelGroup& group,
                                               kodi::addon::PVRChannelGroupMembersResultSet& results)
 {
-  return PVR_ERROR_NOT_IMPLEMENTED;
+  kodi::Log(ADDON_LOG_DEBUG, "pluto.tv function call: [%s]", __FUNCTION__);
+
+  if (!LoadCategoriesData())
+    return PVR_ERROR_SERVER_ERROR;
+
+  if (!LoadChannelsData())
+    return PVR_ERROR_SERVER_ERROR;
+
+  const auto category{std::ranges::find_if(m_categories, [&group](const PlutotvCategory& cat)
+                                           { return cat.name == group.GetGroupName(); })};
+  if (category != m_categories.cend())
+  {
+    for (const int uid : (*category).channelUIDs)
+    {
+      // Find channel data
+      for (const auto& channel : m_channels)
+      {
+        if (channel.iUniqueId != uid)
+          continue;
+
+        kodi::addon::PVRChannelGroupMember kodiGroupMember;
+        kodiGroupMember.SetGroupName((*category).name);
+        kodiGroupMember.SetChannelUniqueId(uid);
+        kodiGroupMember.SetChannelNumber(channel.iChannelNumber);
+
+        results.Add(std::move(kodiGroupMember));
+        break;
+      }
+    }
+  }
+
+  return PVR_ERROR_NO_ERROR;
 }
 
 PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
@@ -591,6 +707,36 @@ std::string PlutotvData::GetChannelsJson() const
   }
 
   kodi::Log(ADDON_LOG_ERROR, "[GetChannelsJson] ERROR. status: %i, body: %s", statusCode,
+            json.c_str());
+  return {};
+}
+
+std::string PlutotvData::GetCategoriesJson() const
+{
+  std::string url{"https://service-channels.clusters.pluto.tv/v2/guide/categories"};
+  url += "?channelIds="; // all channels
+  url += "&offset=0";
+  url += "&limit=1000";
+  url += "&sort=number:asc";
+
+  Curl curl;
+  curl.AddHeader("authority", "service-channels.clusters.pluto.tv");
+  curl.AddHeader("accept", "*/*");
+  curl.AddHeader("accept-language", "en-US,en;q=0.9");
+  curl.AddHeader("authorization", "Bearer " + m_jwt);
+  curl.AddHeader("origin", "https://pluto.tv");
+  curl.AddHeader("referer", "https://pluto.tv/");
+  curl.AddHeader("user-agent", PLUTOTV_USER_AGENT);
+
+  int statusCode{500};
+  const std::string json{curl.Get(url, statusCode)};
+  if (statusCode == 200)
+  {
+    kodi::Log(ADDON_LOG_DEBUG, "[GetCategoriesJson] Response: %s.", json.c_str());
+    return json;
+  }
+
+  kodi::Log(ADDON_LOG_ERROR, "[GetCategoriesJson] ERROR. status: %i, body: %s", statusCode,
             json.c_str());
   return {};
 }
