@@ -84,8 +84,20 @@ private:
                            bool realtime);
   bool LoadChannelsData();
 
+  bool LoadCategoriesData();
+
+  struct PlutotvCategory
+  {
+    std::string name;
+    std::vector<int> channelUIDs;
+  };
+
+  std::vector<PlutotvCategory> m_categories;
+  bool m_categoriesLoaded{false};
+
   std::string GetJWT();
   std::string GetChannelsJson() const;
+  std::string GetCategoriesJson() const;
   std::string GetEpgJson(time_t start) const;
 
   std::string m_jwt;
