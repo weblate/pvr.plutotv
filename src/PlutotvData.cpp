@@ -506,7 +506,7 @@ PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
       {
         kodi::addon::PVREPGTag tag;
 
-        // generate a unique boadcast id
+        // generate a unique broadcast id
         const std::string epg_bsid = epgData.at("_id");
         kodi::Log(ADDON_LOG_DEBUG, "[epg] epg_bsid: %s;", epg_bsid.c_str());
         const int epg_bid = Utils::Hash(epg_bsid);
@@ -604,7 +604,6 @@ PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
               episode.at("name").is_string())
           {
             // series title
-
             const std::string seriesTitle{episode.at("series").at("name")};
             tag.SetTitle(seriesTitle);
             kodi::Log(ADDON_LOG_DEBUG, "[epg] series title: %s", seriesTitle.c_str());
