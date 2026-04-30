@@ -9,11 +9,13 @@
 #pragma once
 
 #include "kodi/addon-instance/PVR.h"
-#include <nlohmann/json.hpp>
 
-#include <chrono>
 #include <memory>
 #include <vector>
+
+#include <nlohmann/json.hpp>
+
+class Curl;
 
 /**
  * User Agent for HTTP Requests
@@ -67,6 +69,13 @@ private:
     std::string strStreamURL;
   };
 
+  // Wraps an HTTP response for error analysis
+  struct HttpResponse
+  {
+    int statusCode{500};
+    std::string body;
+  };
+
   std::shared_ptr<nlohmann::json> m_epg_cache_document;
   time_t m_epg_cache_start = time_t(0);
   time_t m_epg_cache_end = time_t(0);
@@ -75,7 +84,7 @@ private:
   bool m_bChannelsLoaded = false;
 
   std::string GetChannelStreamURL(int uniqueId);
-  std::string GetSettingsUUID(const std::string& setting);
+  std::string GetSettingsUUID(const std::string& setting) const;
   int GetSettingsStartChannel() const;
   bool GetSettingsColoredChannelLogos() const;
   bool GetSettingsWorkaroundBrokenStreams() const;
@@ -95,11 +104,24 @@ private:
   std::vector<PlutotvCategory> m_categories;
   bool m_categoriesLoaded{false};
 
-  std::string GetJWT();
+  // Returns true if the response indicates an expired JWT (HTTP 401 + errorCode
+  // "InvalidExpiredBearerToken"). Used by AuthenticatedGet to decide whether to
+  // refresh the token and retry the request.
+  bool IsExpiredTokenResponse(const HttpResponse& response) const;
+
+  // Performs an authenticated GET request. Adds the current JWT as Bearer token.
+  // On HTTP 401 with errorCode "InvalidExpiredBearerToken" the token is cleared,
+  // a new one is fetched via GetJWT(), and the request is retried exactly once.
+  // Returns the response body on success, or an empty string on failure.
+  // Note: 'curl' must already have all headers except "authorization" set by the caller.
+  std::string AuthenticatedGet(Curl& curl, const std::string& url) const;
+
+  std::string GetJWT() const;
   std::string GetChannelsJson() const;
   std::string GetCategoriesJson() const;
   std::string GetEpgJson(time_t start) const;
 
-  std::string m_jwt;
-  std::chrono::time_point<std::chrono::steady_clock> m_jwtTimestamp;
+  // mutable: m_jwt is a cached session token that may be transparently refreshed
+  // by AuthenticatedGet() on HTTP 401, even from const API methods.
+  mutable std::string m_jwt;
 };
