@@ -105,10 +105,6 @@ bool PlutotvData::LoadChannelsData()
   if (m_bChannelsLoaded)
     return true;
 
-  GetJWT();
-  if (m_jwt.empty())
-    return false;
-
   kodi::Log(ADDON_LOG_DEBUG, "[load data] GET CHANNELS");
 
   const std::string jsonChannels{GetChannelsJson()};
@@ -265,7 +261,7 @@ PVR_ERROR PlutotvData::GetChannelStreamProperties(
   return ret;
 }
 
-std::string PlutotvData::GetSettingsUUID(const std::string& setting)
+std::string PlutotvData::GetSettingsUUID(const std::string& setting) const
 {
   std::string uuid = kodi::addon::GetSettingString(setting);
   if (uuid.empty())
@@ -305,7 +301,7 @@ std::string PlutotvData::GetChannelStreamURL(int uniqueId)
       kodi::Log(ADDON_LOG_DEBUG, "Get live url for channel %s", channel.strChannelName.c_str());
 
       // Complete stream URL with JWT.
-      const std::string streamURL{channel.strStreamURL + m_jwt};
+      const std::string streamURL{channel.strStreamURL + GetJWT()};
       kodi::Log(ADDON_LOG_DEBUG, "stream URL: %s", streamURL.c_str());
       return streamURL;
     }
@@ -317,10 +313,6 @@ bool PlutotvData::LoadCategoriesData()
 {
   if (m_categoriesLoaded)
     return true;
-
-  GetJWT();
-  if (m_jwt.empty())
-    return false;
 
   kodi::Log(ADDON_LOG_DEBUG, "[load data] GET CATEGORIES");
 
@@ -506,7 +498,7 @@ PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
       {
         kodi::addon::PVREPGTag tag;
 
-        // generate a unique boadcast id
+        // generate a unique broadcast id
         const std::string epg_bsid = epgData.at("_id");
         kodi::Log(ADDON_LOG_DEBUG, "[epg] epg_bsid: %s;", epg_bsid.c_str());
         const int epg_bid = Utils::Hash(epg_bsid);
@@ -604,7 +596,6 @@ PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
               episode.at("name").is_string())
           {
             // series title
-
             const std::string seriesTitle{episode.at("series").at("name")};
             tag.SetTitle(seriesTitle);
             kodi::Log(ADDON_LOG_DEBUG, "[epg] series title: %s", seriesTitle.c_str());
@@ -631,52 +622,83 @@ PVR_ERROR PlutotvData::GetEPGForChannel(int channelUid,
   return PVR_ERROR_INVALID_PARAMETERS;
 }
 
-std::string PlutotvData::GetJWT()
+bool PlutotvData::IsExpiredTokenResponse(const HttpResponse& response) const
 {
-  // JWT expires after 24 hours
-  if (m_jwt.empty() || (std::chrono::steady_clock::now() - m_jwtTimestamp > std::chrono::hours(23)))
+  if (response.statusCode != 401)
+    return false;
+
+  nlohmann::json doc = nlohmann::json::parse(response.body, nullptr, false);
+  if (doc.is_discarded())
+    return false;
+
+  return doc.value("errorCode", "") == "InvalidExpiredBearerToken";
+}
+
+std::string PlutotvData::AuthenticatedGet(Curl& curl, const std::string& url) const
+{
+  curl.AddHeader("authorization", "Bearer " + GetJWT());
+
+  int statusCode{500};
+  std::string body{curl.Get(url, statusCode)};
+
+  if (IsExpiredTokenResponse({statusCode, body}))
   {
-    std::string url{"https://boot.pluto.tv/v4/start"};
-    url += "?appName=web";
-    url += "&appVersion=1.0.0";
-    url += "&deviceVersion=122.0.0"; // has to match user agent?
-    url += "&deviceModel=web";
-    url += "&deviceMake=chrome"; // has to match user agent?
-    url += "&deviceType=web";
-    url += "&clientID=" + GetSettingsUUID("internal_clientid");
-    url += "&clientModelNumber=1.0.0";
-    url += "&serverSideAds=false";
-    url += "&drmCapabilities=widevine%3AL3"; // Widevine L3 device
-    url += "&blockingMode=";
-    url += "&notificationVersion=1";
-    url += "&appLaunchCount=";
-    url += "&lastAppLaunchDate=";
-
+    kodi::Log(ADDON_LOG_DEBUG, "[AuthenticatedGet] JWT expired (401), refreshing and retrying.");
     m_jwt.clear();
+    curl.AddHeader("authorization", "Bearer " + GetJWT());
+    body = curl.Get(url, statusCode);
+  }
 
-    Curl curl;
-    curl.AddHeader("User-Agent", PLUTOTV_USER_AGENT);
+  if (statusCode == 200)
+    return body;
 
-    int statusCode{500};
-    const std::string json{curl.Get(url, statusCode)};
-    if (statusCode == 200)
+  kodi::Log(ADDON_LOG_ERROR, "[AuthenticatedGet] ERROR. status: %i, url: %s", statusCode,
+            url.c_str());
+  return {};
+}
+
+std::string PlutotvData::GetJWT() const
+{
+  if (!m_jwt.empty())
+    return m_jwt;
+
+  std::string url{"https://boot.pluto.tv/v4/start"};
+  url += "?appName=web";
+  url += "&appVersion=1.0.0";
+  url += "&deviceVersion=122.0.0"; // has to match user agent?
+  url += "&deviceModel=web";
+  url += "&deviceMake=chrome"; // has to match user agent?
+  url += "&deviceType=web";
+  url += "&clientID=" + GetSettingsUUID("internal_clientid");
+  url += "&clientModelNumber=1.0.0";
+  url += "&serverSideAds=false";
+  url += "&drmCapabilities=widevine%3AL3"; // Widevine L3 device
+  url += "&blockingMode=";
+  url += "&notificationVersion=1";
+  url += "&appLaunchCount=";
+  url += "&lastAppLaunchDate=";
+
+  Curl curl;
+  curl.AddHeader("User-Agent", PLUTOTV_USER_AGENT);
+
+  int statusCode{500};
+  const std::string json{curl.Get(url, statusCode)};
+  if (statusCode == 200)
+  {
+    nlohmann::json doc = nlohmann::json::parse(json.c_str());
+    if (doc.is_discarded())
     {
-      nlohmann::json doc = nlohmann::json::parse(json.c_str());
-      if (doc.is_discarded())
-      {
-        kodi::Log(ADDON_LOG_ERROR, "[GetJWT] ERROR: error while parsing json");
-      }
-      else
-      {
-        m_jwt = doc.at("sessionToken");
-        m_jwtTimestamp = std::chrono::steady_clock::now();
-        kodi::Log(ADDON_LOG_DEBUG, "[GetJWT]: New JWT: %s.", m_jwt.c_str());
-      }
+      kodi::Log(ADDON_LOG_ERROR, "[GetJWT] ERROR: error while parsing json");
     }
     else
     {
-      kodi::Log(ADDON_LOG_ERROR, "[GetJWT] error. status: %i, body: %s", statusCode, json.c_str());
+      m_jwt = doc.at("sessionToken");
+      kodi::Log(ADDON_LOG_DEBUG, "[GetJWT]: New JWT: %s.", m_jwt.c_str());
     }
+  }
+  else
+  {
+    kodi::Log(ADDON_LOG_ERROR, "[GetJWT] error. status: %i, body: %s", statusCode, json.c_str());
   }
   return m_jwt;
 }
@@ -693,22 +715,11 @@ std::string PlutotvData::GetChannelsJson() const
   curl.AddHeader("authority", "service-channels.clusters.pluto.tv");
   curl.AddHeader("accept", "*/*");
   curl.AddHeader("accept-language", "en-US,en;q=0.9");
-  curl.AddHeader("authorization", "Bearer " + m_jwt);
   curl.AddHeader("origin", "https://pluto.tv");
   curl.AddHeader("referer", "https://pluto.tv/");
   curl.AddHeader("user-agent", PLUTOTV_USER_AGENT);
 
-  int statusCode{500};
-  const std::string json{curl.Get(url, statusCode)};
-  if (statusCode == 200)
-  {
-    kodi::Log(ADDON_LOG_DEBUG, "[GetChannelsJson] Response: %s.", json.c_str());
-    return json;
-  }
-
-  kodi::Log(ADDON_LOG_ERROR, "[GetChannelsJson] ERROR. status: %i, body: %s", statusCode,
-            json.c_str());
-  return {};
+  return AuthenticatedGet(curl, url);
 }
 
 std::string PlutotvData::GetCategoriesJson() const
@@ -723,22 +734,11 @@ std::string PlutotvData::GetCategoriesJson() const
   curl.AddHeader("authority", "service-channels.clusters.pluto.tv");
   curl.AddHeader("accept", "*/*");
   curl.AddHeader("accept-language", "en-US,en;q=0.9");
-  curl.AddHeader("authorization", "Bearer " + m_jwt);
   curl.AddHeader("origin", "https://pluto.tv");
   curl.AddHeader("referer", "https://pluto.tv/");
   curl.AddHeader("user-agent", PLUTOTV_USER_AGENT);
 
-  int statusCode{500};
-  const std::string json{curl.Get(url, statusCode)};
-  if (statusCode == 200)
-  {
-    kodi::Log(ADDON_LOG_DEBUG, "[GetCategoriesJson] Response: %s.", json.c_str());
-    return json;
-  }
-
-  kodi::Log(ADDON_LOG_ERROR, "[GetCategoriesJson] ERROR. status: %i, body: %s", statusCode,
-            json.c_str());
-  return {};
+  return AuthenticatedGet(curl, url);
 }
 
 std::string PlutotvData::GetEpgJson(time_t start) const
@@ -756,21 +756,11 @@ std::string PlutotvData::GetEpgJson(time_t start) const
   curl.AddHeader("authority", "service-channels.clusters.pluto.tv");
   curl.AddHeader("accept", "*/*");
   curl.AddHeader("accept-language", "en-US,en;q=0.9");
-  curl.AddHeader("authorization", "Bearer " + m_jwt);
   curl.AddHeader("origin", "https://pluto.tv");
   curl.AddHeader("referer", "https://pluto.tv/");
   curl.AddHeader("user-agent", PLUTOTV_USER_AGENT);
 
-  int statusCode{500};
-  const std::string json{curl.Get(url, statusCode)};
-  if (statusCode == 200)
-  {
-    kodi::Log(ADDON_LOG_DEBUG, "[GetEpgJson] Response: %s.", json.c_str());
-    return json;
-  }
-
-  kodi::Log(ADDON_LOG_ERROR, "[GetEpgJson] ERROR. status: %i, body: %s", statusCode, json.c_str());
-  return "";
+  return AuthenticatedGet(curl, url);
 }
 
 ADDONCREATOR(PlutotvData)
